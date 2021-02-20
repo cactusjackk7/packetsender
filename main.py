@@ -20,5 +20,3 @@ try:
     except socket.error as socketerror:
     s.close()
    print("Error: ", socketerror)
-
-

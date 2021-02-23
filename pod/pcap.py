@@ -17,3 +17,4 @@ if len(sys.argv) == 1:
     wrpcap(filename, pkgs)
 
     print('%s packets generated.' % (n))   
+    print("done")

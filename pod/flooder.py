@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#this is for eductional only!
+#this is for eductional purposes only!
 
 from scapy.all import *
 import sys
@@ -16,4 +16,4 @@ if len(sys.argv) == 1:
     for i in range (n):
         print('Sending %s packets.' % (len(pkgs)))
             sendpfast(pkgs)
-                print('Done, part %s of %s' % ((i+1) , n))
+        print('Done, part %s of %s' % ((i+1) , n))

@@ -25,3 +25,24 @@ class OverloadFunction(object):
        self = super().__new__(cls)
        self.functions = [funct]
        return functools.wraps(funct)(self)
+
+    def addfunct(self, funct):
+         self._functions.append(funct)
+
+    def __get__(self, instance, owner):
+         self.instance = instance
+         return self
+    
+    def _typematch(self, arguments, parameters):
+        for name, param in parameters.items():
+            if param.annotation is not Parameter.empty:
+               test = param.annotation
+               if type(test) == type:
+                  if not isinstance(arguments[name], test):
+                     return False
+
+                  else:
+                     if not test(arg):
+                        return False
+
+                 return True 

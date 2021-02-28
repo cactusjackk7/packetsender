@@ -22,3 +22,42 @@ class OverloadedFunction:
             raise OverloadException(f"Overloaded function '{self._name}' does not provide an overload for the signature {signature}")
         else:
             return func(*args) 
+
+def overload(overloaded_funcname: str):
+    def decorator(func: Callable[[Any], Any])-> Callable[[Any], Any]:
+        if overloaded_funcname not in globals():
+            globals()[overloaded_funcname] = OverloadedFunction(overloaded_funcname)
+        overloaded_func = globals()[overloaded_funcname]
+        if not isinstance(overloaded_func, OverloadedFunction):
+            raise OverloadException("Given function name does not correspond to an overloaded function")
+        signature = func.__annotations__
+        if 'return' in signature:
+            signature.pop('return')
+        signature = tuple(signature.values())
+        overloaded_func.add_overload(signature, func)
+        return func
+    return decorator
+
+
+if __name__ == '__main__':
+
+    @overload('test')
+    def test1(x: int):
+        return x + 42
+
+    @overload('test')
+    def test2(x: float):
+        return x * 0.5
+
+    @overload('test')
+    def test3(x: str):
+			return x + "!!!"
+
+    @overload('test')
+    def test4(n: int, x: str):
+         return x + "!"*n
+
+         print(test(2))
+         print(test(2.0))
+         print(test("hi"))
+         print(test(5, "Hi"))

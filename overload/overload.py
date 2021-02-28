@@ -46,3 +46,77 @@ class OverloadFunction(object):
                         return False
 
                  return True 
+
+     def __call__(self, *x, **y):
+        # This is a little fcked, but here it goes.
+        for funct in self._functions:
+            signature = inspect.signature(funct)
+            try:
+                bound = signature.bind(self.instance, *x, **y)
+            except TypeError:
+                continue
+			if self._typematch(bound.arguments, signature.parameters):
+				rtype = signature.return_annotation
+				rval = funct(*bound.args, **bound.kwargs)
+				if rtype is not Signature.empty:
+					if type(rtype) == type:
+						  if isinstance(rval, rtype):
+                            return rval
+                    else:
+                        if rtype(rval):
+                            return rval
+                else:
+                    return rval
+                raise TypeError("Type returned by function does not pass type check.")
+        raise TypeError("No defined function matches provided arguments.")
+
+    def __getitem__(self, key):
+        functs = [i for i in self._functions if issubclass(key, inspect.signature(i).return_annotation)]
+        if not functs:
+            raise TypeError("No function signatures match requested return type.")
+        filtered = OverloadedFunction(functs.pop(0))
+        for i in functs:
+            filtered.addfunct(i)
+        return filtered
+
+class OverloadedNamespace(OrderedDict):
+    def __setitem__(self, name, value):
+        if callable(value):
+            if name in self:
+                # Overload
+                super().__setitem__(name, OverloadedFunction(self[name]))
+                self[name].addfunct(value)
+            elif inspect.getfullargspec(value).annotations:
+                super().__setitem__(name, OverloadedFunction(value))
+            else:
+                super().__setitem__(name, value)
+        else:
+            super().__setitem__(name, value)
+
+
+class Overload(type):
+    """
+    A metaclass for specifying an overloaded function.
+	"""
+
+	@classmethod 
+	def __prepare__(cls, name, bases):
+		return OverloadNamespace()
+
+	def __new__(cls, name, bases, clsdict):
+		return super().__new__(cls, name, bases, dict(clsdict))
+
+class Overloaded(metaclass=Overload):
+   pass
+
+
+
+
+
+
+
+
+
+
+
+ 
